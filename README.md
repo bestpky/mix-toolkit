@@ -1,6 +1,38 @@
 # 工具杂烩
 
-## About tsconfig
+## 构建
+
+```bash
+# 构建所有包
+npm run build
+```
+
+## 版本管理
+
+```bash
+# 升级所有包的版本
+npm run version:patch   # 所有包 patch 版本 +1
+npm run version:minor   # 所有包 minor 版本 +1
+npm run version:major   # 所有包 major 版本 +1
+
+# 升级单个包的版本
+node scripts/version.js patch better-lazy-image
+node scripts/version.js minor open-modal
+```
+
+## 发布
+
+```bash
+# 发布所有包
+npm run publish
+
+# 发布单个包
+node scripts/publish.js better-lazy-image
+node scripts/publish.js open-modal
+
+```
+
+## 关于 tsconfig
 
 1. tsconfig.base.json：
 
