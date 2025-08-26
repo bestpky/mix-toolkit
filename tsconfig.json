@@ -3,12 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@mix-toolkit/*": ["./packages/*/src"]
+      "@mix-toolkit/*": ["./packages/*/src"] // 路径映射，IDE 智能提示
     }
   },
   "references": [
-    { "path": "./packages/better-lazy-image" },
+    { "path": "./packages/better-lazy-image" }, // 🔥 项目引用 tsc --build 时按依赖顺序编译
     { "path": "./packages/open-modal" }
   ],
-  "files": []
+  "files": [] // 🔥 空文件列表，只做引用管理，不编译任何文件
 }

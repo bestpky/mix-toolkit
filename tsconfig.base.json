@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "lib": ["ES2020", "DOM"],
-    "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": false,
-    "composite": true
+    "target": "ES2020", // 目标语法，现代浏览器支持
+    "module": "ESNext", // 输出 ESM 模块
+    "lib": ["ES2020", "DOM"], // 包含的库定义
+    "moduleResolution": "node", // Node.js 模块解析
+    "strict": true, // 严格模式
+    "esModuleInterop": true, // CommonJS/ESM 互操作
+    "skipLibCheck": true, // 跳过库文件检查，提升性能
+    "forceConsistentCasingInFileNames": true, // 强制文件名大小写一致
+
+    // 🔥 关键配置
+    "declaration": true, // 生成 .d.ts 文件
+    "declarationMap": true, // 生成声明文件的 source map
+    "sourceMap": false, // 不生成 JS source map（减少文件）
+    "composite": true // 启用项目引用支持
   }
 }

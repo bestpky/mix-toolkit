@@ -4,7 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": ".",
-    "emitDeclarationOnly": true, // 只生成声明文件
+    "emitDeclarationOnly": true, // 只生成类型声明文件！
     "paths": {
       "@mix-toolkit/better-lazy-image": ["../better-lazy-image/src"]
     }
