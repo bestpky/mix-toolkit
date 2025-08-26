@@ -1,5 +1,5 @@
 {
-  "name": "@mix-toolkit/better-lazy-image",
+  "name": "@mix-toolkit/open-modal",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.cjs.js",
@@ -9,5 +9,8 @@
   "files": ["dist"],
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@mix-toolkit/better-lazy-image": "workspace:^0.0.1"
+  }
 }

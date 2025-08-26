@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@mix-toolkit/*": ["./packages/*/src"]
+    }
+  },
+  "references": [
+    { "path": "./packages/better-lazy-image" },
+    { "path": "./packages/open-modal" }
+  ],
+  "files": []
+}
