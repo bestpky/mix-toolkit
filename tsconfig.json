@@ -1,10 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@mix-toolkit/*": ["./packages/*/src"] // 路径映射，IDE 智能提示
-    }
+    "baseUrl": "."
   },
   "references": [
     { "path": "./packages/better-lazy-image" }, // 🔥 项目引用 tsc --build 时按依赖顺序编译

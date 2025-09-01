@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // 🔥 关键：example 项目不输出任何文件
+    "noEmit": true,
+    "composite": false,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@mix-toolkit/*": ["../packages/*"]
+    }
+  },
+
+  "include": ["./**/*"]
+}

@@ -1,0 +1,36 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background-color: rgba(#000, 0.5);
+  .topBar {
+    height: 40px;
+    text-align: right;
+    > i {
+      cursor: pointer;
+      margin: 6px 10px 0 0;
+    }
+  }
+  .content {
+    background-color: #fff;
+    height: calc(100vh - 40px);
+    animation: slide 0.3s ease;
+    &.fullHeight {
+      height: 100vh;
+    }
+  }
+}
+
+@keyframes slide {
+  from {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
