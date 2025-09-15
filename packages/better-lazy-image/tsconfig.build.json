@@ -6,8 +6,9 @@
     "baseUrl": ".",
     "composite": false,
     "declaration": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "jsx": "react-jsx"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "type.d.ts"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"]
 }

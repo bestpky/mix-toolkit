@@ -104,7 +104,9 @@ const config = {
         'react-dom': 'ReactDOM',
         'react/jsx-runtime': 'ReactJSXRuntime',
         'react-dom/client': 'ReactDOMClient',
-        classnames: 'classNames'
+        classnames: 'classNames',
+        rxjs: 'rxjs',
+        'rxjs/operators': 'rxjs.operators'
       }
     }
   ].filter(Boolean)
