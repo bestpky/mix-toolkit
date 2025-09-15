@@ -5,7 +5,6 @@ import path from 'path'
 import fs from 'fs'
 import postcss from 'rollup-plugin-postcss'
 import url from '@rollup/plugin-url'
-import sass from 'sass'
 
 const TARGET = process.env.TARGET
 
