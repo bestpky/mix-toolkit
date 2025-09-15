@@ -36,8 +36,19 @@ const isExternal = id => {
   return false
 }
 
+const possibleEntries = ['src/index.tsx', 'src/index.ts']
+function findEntry(packageDir) {
+  for (const entry of possibleEntries) {
+    const fullPath = path.resolve(packageDir, entry)
+    if (fs.existsSync(fullPath)) {
+      return fullPath
+    }
+  }
+  throw new Error(`No entry file found. Tried: ${possibleEntries.join(', ')}`)
+}
+
 const config = {
-  input: path.resolve(packageDir, 'src/index.tsx'),
+  input: findEntry(packageDir),
   external: isExternal,
   plugins: [
     resolve({
