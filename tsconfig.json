@@ -6,7 +6,8 @@
   "references": [
     { "path": "./packages/better-lazy-image" }, // 🔥 项目引用 tsc --build 时按依赖顺序编译
     { "path": "./packages/open-modal" },
-    { "path": "./packages/utils" }
+    { "path": "./packages/utils" },
+    { "path": "./packages/hooks" }
   ],
   "files": [] // 🔥 空文件列表，只做引用管理，不编译任何文件
 }

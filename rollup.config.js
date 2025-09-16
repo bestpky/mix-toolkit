@@ -116,7 +116,9 @@ const config = {
         'react-dom/client': 'ReactDOMClient',
         classnames: 'classNames',
         rxjs: 'rxjs',
-        'rxjs/operators': 'rxjs.operators'
+        'rxjs/operators': 'rxjs.operators',
+        '@mix-toolkit/utils': 'MixToolkitUtils',
+        '@juggle/resize-observer': 'resizeObserver'
       }
     }
   ].filter(Boolean)

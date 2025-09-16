@@ -6,11 +6,7 @@
     "baseUrl": ".",
     "emitDeclarationOnly": true, // 只生成类型声明文件！
     "jsx": "react-jsx"
-    // "paths": {
-    //   "@mix-toolkit/better-lazy-image": ["../better-lazy-image/src"]
-    // }
   },
   "include": ["src/**/*", "type.d.ts"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"]
-  // "references": [{ "path": "../better-lazy-image" }]
 }

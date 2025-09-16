@@ -1,5 +1,5 @@
 {
-  "name": "@mix-toolkit/utils",
+  "name": "@mix-toolkit/hooks",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.cjs.js",
@@ -11,8 +11,5 @@
   ],
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@juggle/resize-observer": "^3.4.0"
-  }
+  "license": "ISC"
 }
