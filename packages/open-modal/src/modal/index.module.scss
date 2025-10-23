@@ -9,7 +9,8 @@
   .topBar {
     height: 40px;
     text-align: right;
-    > i {
+    > span {
+      display: inline-block;
       cursor: pointer;
       margin: 6px 10px 0 0;
     }
@@ -17,14 +18,17 @@
   .content {
     background-color: #fff;
     height: calc(100vh - 40px);
-    animation: slide 0.3s ease;
+    animation: slideIn 0.3s ease;
     &.fullHeight {
       height: 100vh;
+    }
+    &.slideOut {
+      animation: slideOut 0.3s ease;
     }
   }
 }
 
-@keyframes slide {
+@keyframes slideIn {
   from {
     transform: translateY(50%);
     opacity: 0;
@@ -32,5 +36,16 @@
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(50%);
+    opacity: 0;
   }
 }

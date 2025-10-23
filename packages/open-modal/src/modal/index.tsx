@@ -20,6 +20,15 @@ export interface ModalProps {
  */
 export const Modal = ({ children, visible, onClose, style, className, contentClassName, fullHeight }: ModalProps) => {
   const [modalElement, setModalElement] = useState<HTMLDivElement | null>(null)
+  const [isClosing, setIsClosing] = useState(false)
+
+  const handleClose = () => {
+    setIsClosing(true)
+    setTimeout(() => {
+      setIsClosing(false)
+      onClose?.()
+    }, 300)
+  }
 
   useEffect(() => {
     if (visible) {
@@ -34,18 +43,29 @@ export const Modal = ({ children, visible, onClose, style, className, contentCla
     }
   }, [visible])
 
+  useEffect(() => {}, [])
+
   if (!visible || modalElement === null) return null
 
   return createPortal(
     <div className={classNames(styles.modal, className)} style={style}>
       {!fullHeight && (
         <div className={styles.topBar}>
-          <span onClick={onClose} style={{ cursor: 'pointer' }}>
-            <img src={closeIcon} width={34} style={{ padding: '0 8px' }} alt="close" />
+          <span onClick={handleClose} style={{ cursor: 'pointer' }}>
+            <img src={closeIcon} width={40} style={{ padding: '0 8px' }} alt="close" />
           </span>
         </div>
       )}
-      <div className={classNames(styles.content, contentClassName, fullHeight && styles.fullHeight)}>{children}</div>
+      <div
+        className={classNames(
+          styles.content,
+          contentClassName,
+          fullHeight && styles.fullHeight,
+          isClosing && styles.slideOut
+        )}
+      >
+        {children}
+      </div>
     </div>,
     modalElement
   )
