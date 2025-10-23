@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router'
 
-import { HomePage, OpenModalPage, BetterLazyImagePage } from './pages'
+import { HomePage, OpenModalPage, BetterLazyImagePage, EditorPage } from './pages'
 
 export const router = createBrowserRouter([
   {
@@ -14,5 +14,9 @@ export const router = createBrowserRouter([
   {
     path: 'better-lazy-image',
     Component: BetterLazyImagePage
+  },
+  {
+    path: 'editor',
+    Component: EditorPage
   }
 ])

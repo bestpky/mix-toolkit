@@ -8,6 +8,9 @@ export const HomePage = () => {
       <br />
       <br />
       <Link to="better-lazy-image">Lazy Image</Link>
+      <br />
+      <br />
+      <Link to="editor">Editor</Link>
     </>
   )
 }

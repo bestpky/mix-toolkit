@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 编辑器样式 */
+.ProseMirror {
+  outline: none;
+  padding: 1rem;
+  min-height: 200px;
+}
+
+.ProseMirror p {
+  margin: 0.75rem 0;
+}
+
+.ProseMirror p:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+
+.collaboration-cursor {
+  border-left: 2px solid;
+  margin-left: -1px;
+  margin-right: -1px;
+  position: relative;
+}
+
+.collaboration-cursor::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: inherit;
+}

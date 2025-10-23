@@ -99,28 +99,28 @@ const config = {
       format: 'cjs',
       exports: 'auto',
       sourcemap: false
-    },
-    // UMD (如果需要)
-    packageJson.browser && {
-      file: path.resolve(packageDir, packageJson.browser),
-      format: 'umd',
-      name: `MixToolkit${TARGET.split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join('')}`,
-      sourcemap: false,
-      globals: {
-        '@mix-toolkit/better-lazy-image': 'MixToolkitBetterLazyImage',
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        'react/jsx-runtime': 'ReactJSXRuntime',
-        'react-dom/client': 'ReactDOMClient',
-        classnames: 'classNames',
-        rxjs: 'rxjs',
-        'rxjs/operators': 'rxjs.operators',
-        '@mix-toolkit/utils': 'MixToolkitUtils',
-        '@juggle/resize-observer': 'resizeObserver'
-      }
     }
+    // UMD (如果需要)
+    // packageJson.browser && {
+    //   file: path.resolve(packageDir, packageJson.browser),
+    //   format: 'umd',
+    //   name: `MixToolkit${TARGET.split('-')
+    //     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    //     .join('')}`,
+    //   sourcemap: false,
+    //   globals: {
+    //     '@mix-toolkit/better-lazy-image': 'MixToolkitBetterLazyImage',
+    //     react: 'React',
+    //     'react-dom': 'ReactDOM',
+    //     'react/jsx-runtime': 'ReactJSXRuntime',
+    //     'react-dom/client': 'ReactDOMClient',
+    //     classnames: 'classNames',
+    //     rxjs: 'rxjs',
+    //     'rxjs/operators': 'rxjs.operators',
+    //     '@mix-toolkit/utils': 'MixToolkitUtils',
+    //     '@juggle/resize-observer': 'resizeObserver'
+    //   }
+    // }
   ].filter(Boolean)
 }
 
