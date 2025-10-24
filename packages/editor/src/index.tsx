@@ -1,205 +1,182 @@
-import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { useEffect, useRef, useState } from 'react'
 import { CollaborationExtension } from './extensions/collaboration'
-import { useCollaboration } from './hooks/use-collaboration'
 import Typography from '@tiptap/extension-typography'
-import { EditorContent } from '@tiptap/react'
+import { EditorContent, useEditor } from '@tiptap/react'
+import { useEffect, useState } from 'react'
+import { User } from './types'
 
-export function CollaborationEditor() {
-  const editorRef = useRef<HTMLDivElement>(null)
-  const [editor, setEditor] = useState<Editor | null>(null)
-  const { users, saveStatus, joinCollaboration, leaveCollaboration, getCurrentState } = useCollaboration(editor)
+interface CollaborationEditorProps {
+  userName?: string
+  userColor?: string
+  initialContent?: string
+}
 
-  useEffect(() => {
-    if (!editorRef.current) return
+export function CollaborationEditor({ userName, userColor, initialContent }: CollaborationEditorProps = {}) {
+  const [users, setUsers] = useState<User[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
 
-    const editorInstance = new Editor({
-      element: editorRef.current, // 正确的挂载方式
+  const editor = useEditor(
+    {
       extensions: [
         StarterKit,
         Typography,
         CollaborationExtension.configure({
-          onSave: async content => {
-            console.log('保存文档:', content)
-            await new Promise(resolve => setTimeout(resolve, 1000))
-          },
-          getCurrentUser: () => ({
-            id: 'current-user',
-            name: '当前用户',
-            color: '#10b981'
-          })
+          userName,
+          userColor
         })
       ],
-      content: '<p>开始协作编辑...</p>',
+      content: initialContent || '<p>开始跨标签页协作编辑...</p>',
       editorProps: {
         attributes: {
-          class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl mx-auto focus:outline-none min-h-[200px] p-4'
+          class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl mx-auto focus:outline-none min-h-[400px] p-4'
         }
       }
+    },
+    [] // 添加空依赖数组，确保只创建一次
+  )
+  console.log(currentUser, users)
+  useEffect(() => {
+    if (!editor) {
+      console.log('[useEffect] editor 未就绪')
+      return
+    }
+
+    console.log('[useEffect] editor 已就绪，查找 collaboration extension')
+    console.log('[useEffect] 所有 extensions:', editor.extensionManager.extensions.map(e => e.name))
+
+    const collaborationExt = editor.extensionManager.extensions.find(ext => ext.name === 'collaboration')
+    console.log('[useEffect] collaboration extension:', collaborationExt)
+
+    const storage = collaborationExt?.storage
+
+    if (!storage) {
+      console.log('[useEffect] storage 未找到')
+      return
+    }
+
+    console.log('[useEffect] storage 已找到:', storage)
+    console.log('[useEffect] 初始 users$.value:', storage.users$.value)
+    console.log('[useEffect] 初始 currentUser$.value:', storage.currentUser$.value)
+
+    // 订阅用户列表变化
+    const usersSubscription = storage.users$.subscribe((newUsers: User[]) => {
+      console.log('[useEffect] users$ 更新:', newUsers)
+      setUsers(newUsers)
     })
 
-    setEditor(editorInstance)
+    // 订阅当前用户变化
+    const currentUserSubscription = storage.currentUser$.subscribe((user: User | null) => {
+      console.log('[useEffect] currentUser$ 更新:', user)
+      setCurrentUser(user)
+    })
 
     return () => {
-      editorInstance.destroy()
+      console.log('[useEffect] 清理订阅')
+      usersSubscription.unsubscribe()
+      currentUserSubscription.unsubscribe()
     }
-  }, [])
+  }, [editor])
 
-  const handleJoin = () => {
-    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#6366f1', '#8b5cf6', '#ec4899']
-    const names = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十']
-
-    joinCollaboration({
-      id: `user-${Date.now()}`,
-      name: names[Math.floor(Math.random() * names.length)],
-      color: colors[Math.floor(Math.random() * colors.length)]
-    })
-  }
-
-  const handleSave = () => {
-    if (editor) {
-      editor.commands.saveDocument()
-    }
-  }
+  // 过滤出其他用户（不包括当前用户）
+  const otherUsers = users.filter(user => user.id !== currentUser?.id)
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="bg-gray-50 min-h-screen py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 头部标题 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">协作编辑器</h1>
-          <p className="text-gray-600">实时协作文档编辑，支持多用户同时编辑</p>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">跨标签页协作编辑器</h1>
+          <p className="text-gray-600">实时同步，无需保存。打开多个标签页体验协作效果！</p>
         </div>
 
-        {/* 工具栏 */}
+        {/* 在线用户状态栏 */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
+            {/* 当前用户信息 */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={handleJoin}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                加入协作
-              </button>
+              <span className="text-sm font-medium text-gray-700">当前用户:</span>
+              {currentUser && (
+                <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-md border border-blue-200">
+                  <div
+                    className="w-3 h-3 rounded-full border-2 border-white shadow-sm"
+                    style={{ backgroundColor: currentUser.color }}
+                  />
+                  <span className="text-sm font-medium text-gray-900">{currentUser.name}</span>
+                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">你</span>
+                </div>
+              )}
+            </div>
 
-              <button
-                onClick={handleSave}
-                disabled={saveStatus === 'saving'}
-                className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-medium text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* 在线人数 */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 w-2 h-2 bg-green-500 rounded-full animate-ping opacity-75"></div>
+                </div>
+                <span className="text-sm font-medium text-gray-700">在线:</span>
+              </div>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                {users.length} 个标签页
+              </span>
+            </div>
+          </div>
+
+          {/* 其他标签页用户列表 */}
+          {otherUsers.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center gap-2 mb-2">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
-                {saveStatus === 'saving' ? '保存中...' : '保存文档'}
-              </button>
-            </div>
-
-            {/* 保存状态指示器 */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">状态:</span>
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  saveStatus === 'saved'
-                    ? 'bg-green-100 text-green-800'
-                    : saveStatus === 'saving'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
-                }`}
-              >
-                {saveStatus === 'saved' && (
-                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-                {saveStatus === 'saving' && (
-                  <svg className="animate-spin w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                )}
-                {saveStatus === 'error' && (
-                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-                {saveStatus === 'saved' ? '已保存' : saveStatus === 'saving' ? '保存中' : '保存失败'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* 用户列表 */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-medium text-gray-900">协作用户</h3>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              {users.length} 人在线
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {users.map(user => (
-              <div
-                key={user.id}
-                className="inline-flex items-center gap-2 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-md border border-gray-200 transition-colors duration-200"
-              >
-                <div
-                  className="w-3 h-3 rounded-full border border-white shadow-sm"
-                  style={{ backgroundColor: user.color }}
-                />
-                <span className="text-sm font-medium text-gray-700">{user.name}</span>
-                {user.cursor && (
-                  <span className="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
-                    {user.cursor.from}-{user.cursor.to}
-                  </span>
-                )}
-                <button
-                  onClick={() => leaveCollaboration(user.id)}
-                  className="ml-1 inline-flex items-center justify-center w-5 h-5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors duration-200"
-                  title="移除用户"
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                <span className="text-sm font-medium text-gray-700">其他协作标签页:</span>
               </div>
-            ))}
-            {users.length === 0 && <p className="text-sm text-gray-500 italic">暂无协作用户，点击"加入协作"开始</p>}
-          </div>
+              <div className="flex flex-wrap gap-2">
+                {otherUsers.map(user => (
+                  <div
+                    key={user.id}
+                    className="inline-flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-200"
+                  >
+                    <div
+                      className="w-3 h-3 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: user.color }}
+                    />
+                    <span className="text-sm text-gray-700">{user.name}</span>
+                    {user.cursor && (
+                      <span className="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded" title="光标位置">
+                        <svg className="w-3 h-3 inline" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 编辑器容器 */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 px-4 py-2 bg-gray-50">
-            <h4 className="text-sm font-medium text-gray-700">文档编辑区</h4>
+          <div className="border-b border-gray-200 px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-gray-900">文档编辑区</h4>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-xs text-gray-600">实时同步</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="p-0">
@@ -207,9 +184,26 @@ export function CollaborationEditor() {
           </div>
         </div>
 
-        {/* 底部信息 */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">支持 Markdown 语法，自动保存，实时协作</p>
+        {/* 底部提示信息 */}
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <div className="flex-1">
+              <h5 className="text-sm font-medium text-blue-900 mb-1">使用提示</h5>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• 打开多个标签页（Cmd/Ctrl + T），访问同一个页面体验协作效果</li>
+                <li>• 在任意标签页中编辑，其他标签页会实时同步内容</li>
+                <li>• 关闭标签页时，该用户会自动从协作列表中移除</li>
+                <li>• 所有操作都是本地的，使用 BroadcastChannel API 实现跨标签页通信</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>

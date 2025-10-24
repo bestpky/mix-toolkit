@@ -1,41 +1,13 @@
 import { Extension } from '@tiptap/core'
 import { BehaviorSubject, Subject, Subscription } from 'rxjs'
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
-import type { Editor } from '@tiptap/core'
+import { debounceTime, filter } from 'rxjs/operators'
 import { CollaborationStorage, User } from '../types'
+import { TabBroadcast, generateTabId, generateRandomColor } from '../utils/broadcast'
 
 interface CollaborationOptions {
-  // 可选配置
-  saveDebounceTime?: number
-  onSave?: (content: any) => Promise<void>
-  getCurrentUser?: () => User | null
-}
-
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    collaboration: {
-      /**
-       * 加入协作
-       */
-      joinCollaboration: (user: User) => ReturnType
-      /**
-       * 离开协作
-       */
-      leaveCollaboration: (userId: string) => ReturnType
-      /**
-       * 手动保存文档
-       */
-      saveDocument: () => ReturnType
-      /**
-       * 获取协作状态
-       */
-      getCollaborationState: () => ReturnType
-      /**
-       * 更新当前用户光标
-       */
-      updateMyCursor: () => ReturnType
-    }
-  }
+  // 当前标签页用户信息（可选，如果不提供则自动生成）
+  userName?: string
+  userColor?: string
 }
 
 export const CollaborationExtension = Extension.create<CollaborationOptions, CollaborationStorage>({
@@ -43,49 +15,54 @@ export const CollaborationExtension = Extension.create<CollaborationOptions, Col
 
   addOptions() {
     return {
-      saveDebounceTime: 2000,
-      onSave: async (content: any) => {
-        // 默认的保存实现
-        return new Promise<void>(resolve => setTimeout(resolve, 1000))
-      },
-      getCurrentUser: (): User | null => {
-        // 默认用户
-        return {
-          id: 'user-1',
-          name: '张三',
-          color: '#FF6B6B'
-        }
-      }
+      userName: `用户${Math.floor(Math.random() * 1000)}`,
+      userColor: generateRandomColor()
     }
   },
 
   addStorage() {
+    // 生成当前标签页的唯一 ID
+    const currentTabId = generateTabId()
+
     // 初始化 RxJS Subjects
     const users$ = new BehaviorSubject<User[]>([])
-    const documentChanges$ = new Subject<{ content: any; timestamp: number }>()
+    const currentUser$ = new BehaviorSubject<User | null>(null)
+    const documentChanges$ = new Subject<{ content: any; userId: string }>()
     const cursorUpdates$ = new Subject<{ userId: string; position: { from: number; to: number } }>()
-    const saveStatus$ = new BehaviorSubject<'saved' | 'saving' | 'error'>('saved')
     const subscriptions: Subscription[] = []
 
+    // 初始化跨标签页通信
+    const broadcast = new TabBroadcast()
+
     return {
+      currentTabId,
       users$,
+      currentUser$,
       documentChanges$,
       cursorUpdates$,
-      saveStatus$,
       subscriptions,
+      broadcast,
 
       // 用户管理方法
       addUser: (user: User) => {
         const currentUsers = users$.value
         const existingIndex = currentUsers.findIndex(u => u.id === user.id)
 
+        let newUsers: User[]
         if (existingIndex >= 0) {
-          currentUsers[existingIndex] = user
+          // 更新已存在的用户
+          newUsers = [...currentUsers.slice(0, existingIndex), user, ...currentUsers.slice(existingIndex + 1)]
         } else {
-          currentUsers.push(user)
+          // 添加新用户
+          newUsers = [...currentUsers, user]
         }
 
-        users$.next([...currentUsers])
+        users$.next(newUsers)
+
+        // 如果是当前用户，同时更新 currentUser$
+        if (user.id === currentTabId) {
+          currentUser$.next(user)
+        }
       },
 
       removeUser: (userId: string) => {
@@ -95,30 +72,47 @@ export const CollaborationExtension = Extension.create<CollaborationOptions, Col
       },
 
       updateCursor: (userId: string, position: { from: number; to: number }) => {
-        // 更新用户光标位置
         const currentUsers = users$.value
         const userIndex = currentUsers.findIndex(u => u.id === userId)
 
         if (userIndex >= 0) {
-          currentUsers[userIndex] = {
+          const updatedUser = {
             ...currentUsers[userIndex],
             cursor: position
           }
-          users$.next([...currentUsers])
+          const newUsers = [...currentUsers.slice(0, userIndex), updatedUser, ...currentUsers.slice(userIndex + 1)]
+          users$.next(newUsers)
+
+          // 如果是当前用户，同时更新 currentUser$
+          if (userId === currentTabId) {
+            currentUser$.next(updatedUser)
+          }
         }
 
-        // 发送光标更新事件
         cursorUpdates$.next({ userId, position })
       },
 
-      emitDocumentChange: (content: any) => {
-        documentChanges$.next({
-          content,
-          timestamp: Date.now()
-        })
+      setCurrentUser: (user: User) => {
+        currentUser$.next(user)
+      },
+
+      getCurrentUser: () => {
+        return currentUser$.value
       },
 
       cleanup: () => {
+        // 广播当前用户离开
+        const currentUser = currentUser$.value
+        if (currentUser) {
+          broadcast.send({
+            type: 'USER_LEFT',
+            payload: { userId: currentUser.id }
+          })
+        }
+
+        // 关闭广播通道
+        broadcast.close()
+
         // 清理所有订阅
         subscriptions.forEach(subscription => {
           subscription.unsubscribe()
@@ -127,107 +121,156 @@ export const CollaborationExtension = Extension.create<CollaborationOptions, Col
 
         // 完成所有 Subject
         users$.complete()
+        currentUser$.complete()
         documentChanges$.complete()
         cursorUpdates$.complete()
-        saveStatus$.complete()
       }
     }
   },
 
   onCreate() {
-    // 设置自动保存订阅
-    const saveSubscription = this.storage.documentChanges$
-      .pipe(
-        debounceTime(this.options.saveDebounceTime || 2000),
-        distinctUntilChanged((prev, curr) => JSON.stringify(prev.content) === JSON.stringify(curr.content))
-      )
-      .subscribe(async change => {
-        try {
-          this.storage.saveStatus$.next('saving')
+    // 创建当前用户
+    const currentUser: User = {
+      id: this.storage.currentTabId,
+      name: this.options.userName || `用户${Math.floor(Math.random() * 1000)}`,
+      color: this.options.userColor || generateRandomColor()
+    }
+    console.log('[onCreate] 创建当前用户:', currentUser)
 
-          // 调用配置的保存方法
-          if (this.options.onSave) {
-            await this.options.onSave(change.content)
+    this.storage.setCurrentUser(currentUser)
+    console.log('[onCreate] setCurrentUser后，currentUser$.value:', this.storage.currentUser$.value)
+
+    // 将当前用户添加到用户列表
+    this.storage.addUser(currentUser)
+    console.log('[onCreate] addUser后，users$.value:', this.storage.users$.value)
+
+    // 广播当前用户加入
+    this.storage.broadcast.send({
+      type: 'USER_JOINED',
+      payload: currentUser
+    })
+
+    // 订阅跨标签页消息
+    const broadcastSubscription = this.storage.broadcast.messages$.subscribe(message => {
+      switch (message.type) {
+        case 'USER_JOINED':
+          // 其他标签页用户加入
+          this.storage.addUser(message.payload)
+          // 回复自己的信息，让新标签页知道自己的存在
+          this.storage.broadcast.send({
+            type: 'USER_JOINED',
+            payload: currentUser
+          })
+          break
+
+        case 'USER_LEFT':
+          // 其他标签页用户离开
+          this.storage.removeUser(message.payload.userId)
+          break
+
+        case 'CONTENT_CHANGE':
+          // 其他标签页的内容变更
+          if (message.payload.userId !== currentUser.id) {
+            // 更新编辑器内容，但不触发 onUpdate
+            this.editor.commands.setContent(message.payload.content)
           }
+          break
 
-          this.storage.saveStatus$.next('saved')
-        } catch (error) {
-          this.storage.saveStatus$.next('error')
-          console.error('保存失败:', error)
-        }
+        case 'CURSOR_UPDATE':
+          // 其他标签页的光标更新
+          if (message.payload.userId !== currentUser.id) {
+            this.storage.updateCursor(message.payload.userId, message.payload.position)
+          }
+          break
+      }
+    })
+
+    this.storage.subscriptions.push(broadcastSubscription)
+
+    // 设置内容变更防抖
+    const contentChangeSubscription = this.storage.documentChanges$
+      .pipe(
+        debounceTime(300), // 300ms 防抖
+        filter(change => change.userId === currentUser.id) // 只处理当前用户的变更
+      )
+      .subscribe(change => {
+        // 广播内容变更
+        this.storage.broadcast.send({
+          type: 'CONTENT_CHANGE',
+          payload: change
+        })
       })
 
-    // 保存订阅引用以便清理
-    this.storage.subscriptions.push(saveSubscription)
+    this.storage.subscriptions.push(contentChangeSubscription)
+
+    // 光标位置防抖
+    const cursorUpdateSubscription = this.storage.cursorUpdates$
+      .pipe(
+        debounceTime(100), // 100ms 防抖
+        filter(update => update.userId === currentUser.id)
+      )
+      .subscribe(update => {
+        // 广播光标位置
+        this.storage.broadcast.send({
+          type: 'CURSOR_UPDATE',
+          payload: update
+        })
+      })
+
+    this.storage.subscriptions.push(cursorUpdateSubscription)
+
+    // 监听页面关闭事件
+    const handleBeforeUnload = () => {
+      this.storage.broadcast.send({
+        type: 'USER_LEFT',
+        payload: { userId: currentUser.id }
+      })
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    // 保存事件监听器引用，以便清理
+    ;(this.storage as any)._beforeUnloadHandler = handleBeforeUnload
   },
 
   onUpdate() {
-    // 当编辑器内容更新时，发送变更
-    if (this.editor.isFocused) {
-      this.storage.emitDocumentChange(this.editor.getJSON())
+    // 当编辑器内容更新时，发送到防抖队列
+    const currentUser = this.storage.getCurrentUser()
+    if (this.editor.isFocused && currentUser) {
+      const content = this.editor.getJSON()
+
+      // 发送到防抖队列，会在 onCreate 中订阅并广播
+      this.storage.documentChanges$.next({
+        content,
+        userId: currentUser.id
+      })
     }
   },
 
   onSelectionUpdate() {
-    // 当光标位置更新时
-    if (this.editor.isFocused) {
+    // 当光标位置更新时，发送到防抖队列
+    const currentUser = this.storage.getCurrentUser()
+    if (this.editor.isFocused && currentUser) {
       const { from, to } = this.editor.state.selection
-      const currentUser = this.options.getCurrentUser?.()
 
-      if (currentUser) {
-        this.storage.updateCursor(currentUser.id, { from, to })
-      }
+      // 更新本地光标
+      this.storage.updateCursor(currentUser.id, { from, to })
+
+      // 发送到防抖队列
+      this.storage.cursorUpdates$.next({
+        userId: currentUser.id,
+        position: { from, to }
+      })
     }
   },
 
   onDestroy() {
-    // 组件销毁时清理资源
-    this.storage.cleanup()
-  },
-
-  // 添加命令
-  addCommands() {
-    return {
-      joinCollaboration: (user: User) => () => {
-        this.storage.addUser(user)
-        return true
-      },
-
-      leaveCollaboration: (userId: string) => () => {
-        this.storage.removeUser(userId)
-        return true
-      },
-
-      // 手动触发保存
-      saveDocument: () => () => {
-        const content = this.editor.getJSON()
-        this.storage.emitDocumentChange(content)
-        return true
-      },
-
-      updateMyCursor: () => () => {
-        const { from, to } = this.editor.state.selection
-        const currentUser = this.options.getCurrentUser?.()
-
-        if (currentUser) {
-          this.storage.updateCursor(currentUser.id, { from, to })
-        }
-        return true
-      }
+    // 移除页面关闭监听器
+    const handler = (this.storage as any)._beforeUnloadHandler
+    if (handler) {
+      window.removeEventListener('beforeunload', handler)
     }
+
+    // 清理资源
+    this.storage.cleanup()
   }
 })
-
-export function getCollaborationState(editor: Editor) {
-  const collaborationExt = editor.extensionManager.extensions.find(ext => ext.name === 'collaboration')
-
-  if (!collaborationExt) {
-    return { users: [], saveStatus: 'saved' as const }
-  }
-
-  const storage = (collaborationExt as any).storage as CollaborationStorage
-  return {
-    users: storage.users$.value,
-    saveStatus: storage.saveStatus$.value
-  }
-}
