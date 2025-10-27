@@ -1,0 +1,337 @@
+// MixEditor 样式变量
+$max-width: 900px;
+$border-radius: 12px;
+$padding: 32px 40px;
+$min-height: 500px;
+
+// 颜色变量
+$color-bg-light: #ffffff;
+$color-bg-dark: #1a1a1a;
+$color-text-primary: #1a1a1a;
+$color-text-secondary: #2a2a2a;
+$color-text-dark: #0a0a0a;
+$color-text-muted: #4b5563;
+$color-placeholder: #adb5bd;
+$color-border: #e5e7eb;
+$color-border-dark: #374151;
+$color-code-bg: #f3f4f6;
+$color-code-text: #e63946;
+$color-link: #3b82f6;
+$color-link-hover: #2563eb;
+$color-selection: #dbeafe;
+
+// 字体
+$font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+// 编辑器容器
+.wrapper {
+  max-width: $max-width;
+  margin: 0 auto;
+  margin-top: 48px;
+  background: $color-bg-light;
+  border-radius: $border-radius;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.container {
+  padding: $padding;
+  min-height: $min-height;
+}
+
+// Tiptap ProseMirror 样式 (全局样式,使用 :global)
+.editor {
+  :global {
+    .ProseMirror {
+      outline: none;
+      min-height: 400px;
+      color: $color-text-primary;
+      font-size: 16px;
+      line-height: 1.75;
+      font-family: $font-family;
+
+      // 占位符
+      p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        float: left;
+        color: $color-placeholder;
+        pointer-events: none;
+        height: 0;
+      }
+
+      // 标题样式
+      h1 {
+        font-size: 2.25em;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-top: 0;
+        margin-bottom: 0.8em;
+        color: $color-text-dark;
+        letter-spacing: -0.02em;
+      }
+
+      h2 {
+        font-size: 1.875em;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-top: 1.6em;
+        margin-bottom: 0.8em;
+        color: $color-text-dark;
+        letter-spacing: -0.01em;
+      }
+
+      h3 {
+        font-size: 1.5em;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-top: 1.6em;
+        margin-bottom: 0.6em;
+        color: $color-text-primary;
+      }
+
+      h4 {
+        font-size: 1.25em;
+        font-weight: 600;
+        line-height: 1.5;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        color: $color-text-primary;
+      }
+
+      h5,
+      h6 {
+        font-size: 1em;
+        font-weight: 600;
+        line-height: 1.6;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        color: $color-text-secondary;
+      }
+
+      // 段落样式
+      p {
+        margin-top: 0;
+        margin-bottom: 0.25em;
+      }
+
+      // 列表样式
+      ul,
+      ol {
+        padding-left: 1.75em;
+        margin-top: 0;
+        margin-bottom: 1.25em;
+      }
+
+      ul {
+        list-style-type: disc;
+      }
+
+      ol {
+        list-style-type: decimal;
+      }
+
+      li {
+        margin-bottom: 0.5em;
+        padding-left: 0.25em;
+
+        p {
+          margin-bottom: 0.5em;
+        }
+
+        &::marker {
+          color: #6b7280;
+        }
+      }
+
+      // 嵌套列表
+      ul ul,
+      ul ol,
+      ol ul,
+      ol ol {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+      }
+
+      // 引用样式
+      blockquote {
+        border-left: 4px solid $color-border;
+        padding-left: 1.5em;
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 1.5em;
+        margin-bottom: 1.5em;
+        color: $color-text-muted;
+        font-style: italic;
+
+        p {
+          margin-bottom: 0.75em;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+
+      // 代码样式
+      code {
+        background-color: $color-code-bg;
+        color: $color-code-text;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-size: 0.9em;
+        font-family: $font-family-mono;
+      }
+
+      pre {
+        background-color: $color-bg-dark;
+        color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.25em 1.5em;
+        margin-top: 1.5em;
+        margin-bottom: 1.5em;
+        overflow-x: auto;
+        line-height: 1.6;
+
+        code {
+          background: none;
+          color: inherit;
+          padding: 0;
+          font-size: 0.875em;
+        }
+      }
+
+      // 水平线样式
+      hr {
+        border: none;
+        border-top: 2px solid $color-border;
+        margin: 2em 0;
+      }
+
+      // 加粗和斜体
+      strong {
+        font-weight: 700;
+        color: $color-text-dark;
+      }
+
+      em {
+        font-style: italic;
+        color: $color-text-secondary;
+      }
+
+      // 链接样式
+      a {
+        color: $color-link;
+        text-decoration: underline;
+        text-decoration-color: rgba(59, 130, 246, 0.3);
+        text-underline-offset: 2px;
+        transition: all 0.15s ease;
+
+        &:hover {
+          color: $color-link-hover;
+          text-decoration-color: rgba(37, 99, 235, 0.6);
+        }
+      }
+
+      // 删除线
+      s {
+        text-decoration: line-through;
+        text-decoration-color: #9ca3af;
+        text-decoration-thickness: 2px;
+      }
+
+      // 选中文本样式
+      ::selection {
+        background-color: $color-selection;
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      // 段落间距调整
+      > * + * {
+        margin-top: 0.75em;
+      }
+    }
+  }
+}
+
+// 深色模式支持
+@media (prefers-color-scheme: dark) {
+  .wrapper {
+    background: $color-bg-dark;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .editor {
+    :global {
+      .ProseMirror {
+        color: #e5e5e5;
+
+        h1,
+        h2 {
+          color: #f5f5f5;
+        }
+
+        h3,
+        h4 {
+          color: #e5e5e5;
+        }
+
+        h5,
+        h6 {
+          color: #d5d5d5;
+        }
+
+        blockquote {
+          border-left-color: $color-border-dark;
+          color: #9ca3af;
+        }
+
+        code {
+          background-color: #2a2a2a;
+          color: #ff6b6b;
+        }
+
+        pre {
+          background-color: #0a0a0a;
+          color: #f8f9fa;
+        }
+
+        hr {
+          border-top-color: $color-border-dark;
+        }
+
+        strong {
+          color: #f5f5f5;
+        }
+
+        em {
+          color: #d5d5d5;
+        }
+
+        a {
+          color: #60a5fa;
+
+          &:hover {
+            color: #3b82f6;
+          }
+        }
+
+        ::selection {
+          background-color: #1e3a5f;
+        }
+      }
+    }
+  }
+}
