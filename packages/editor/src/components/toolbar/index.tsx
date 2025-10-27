@@ -1,5 +1,5 @@
 import { Editor } from '@tiptap/react'
-import styles from './Toolbar.module.scss'
+import styles from './style.module.scss'
 
 interface ToolbarProps {
   editor: Editor | null

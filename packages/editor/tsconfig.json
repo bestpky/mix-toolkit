@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["es2021", "dom"],
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": ".",
