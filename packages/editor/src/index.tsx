@@ -2,6 +2,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
+import { Toolbar } from './toolbar'
 import styles from './styles.module.scss'
 
 export function MixEditor() {
@@ -14,8 +15,7 @@ export function MixEditor() {
       }),
       Typography,
       Placeholder.configure({
-        placeholder: '开始创作...',
-        emptyEditorClass: 'is-editor-empty'
+        placeholder: '开始创作...'
       })
     ],
     content: '<p></p>',
@@ -28,6 +28,7 @@ export function MixEditor() {
 
   return (
     <div className={styles.wrapper}>
+      <Toolbar editor={editor} />
       <div className={styles.container}>
         <div className={styles.editor}>
           <EditorContent editor={editor} />
