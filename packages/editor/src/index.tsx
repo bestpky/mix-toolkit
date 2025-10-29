@@ -2,8 +2,10 @@ import StarterKit from '@tiptap/starter-kit'
 import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
-import { Toolbar } from './toolbar'
+import { Toolbar } from './components/toolbar'
 import styles from './styles.module.scss'
+import { CharacterCountBar } from './components/character-count-bar'
+import { CharacterCount } from './extensions/character-count'
 
 export function MixEditor() {
   const editor = useEditor({
@@ -16,7 +18,8 @@ export function MixEditor() {
       Typography,
       Placeholder.configure({
         placeholder: '开始创作...'
-      })
+      }),
+      CharacterCount
     ],
     content: '<p></p>',
     editorProps: {
@@ -28,6 +31,7 @@ export function MixEditor() {
 
   return (
     <div className={styles.wrapper}>
+      <CharacterCountBar editor={editor} />
       <Toolbar editor={editor} />
       <div className={styles.container}>
         <div className={styles.editor}>
