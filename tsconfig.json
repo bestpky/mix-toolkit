@@ -8,7 +8,8 @@
     { "path": "./packages/open-modal" },
     { "path": "./packages/utils" },
     { "path": "./packages/hooks" },
-    { "path": "./packages/editor" }
+    { "path": "./packages/editor" },
+    { "path": "./packages/canvas-editor" }
   ],
   "files": [] // 🔥 空文件列表，只做引用管理，不编译任何文件
 }

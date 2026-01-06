@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router'
 
-import { HomePage, OpenModalPage, BetterLazyImagePage, EditorPage } from './pages'
+import { HomePage, OpenModalPage, BetterLazyImagePage, EditorPage, CanvasEditorPage } from './pages'
 import { Layout } from './layout'
 
 export const router = createBrowserRouter([
@@ -23,6 +23,10 @@ export const router = createBrowserRouter([
       {
         path: 'editor',
         Component: EditorPage
+      },
+      {
+        path: 'canvas-editor',
+        Component: CanvasEditorPage
       }
     ]
   }

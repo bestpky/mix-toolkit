@@ -22,6 +22,12 @@ export const Layout = () => {
       description: '富文本编辑器',
       icon: '✏️',
     },
+    {
+      to: '/canvas-editor',
+      title: 'Canvas Editor',
+      description: '画布编辑器',
+      icon: '🎨',
+    },
   ]
 
   const isActive = (path: string) => location.pathname === path

@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "paths": {
+      "@mix-toolkit/utils": ["../utils/src"]
+    }
+  },
+  "include": ["src/**/*", "type.d.ts"],
+  "exclude": ["dist", "node_modules"],
+  "references": [{ "path": "../utils" }]
+}

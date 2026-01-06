@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "emitDeclarationOnly": true, // 只生成声明文件
+    "jsx": "react-jsx",
+    "paths": {
+      "@mix-toolkit/utils": ["../utils/src"]
+    }
+  },
+  "include": ["src/**/*", "*.d.ts"],
+  "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [{ "path": "../utils" }]
+}
