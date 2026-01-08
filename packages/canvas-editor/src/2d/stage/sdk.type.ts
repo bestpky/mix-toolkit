@@ -20,4 +20,5 @@ export interface IPatternSdk {
   patternImage: HTMLImageElement
   vertices: number[] // 16个顶点坐标
   centerPoint: IPoint
+  useMultiply?: boolean // 是否使用混合模式 (multiply)
 }

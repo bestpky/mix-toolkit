@@ -119,12 +119,39 @@ export const Control: FC<IControlProps> = ({
             </div>
           ) : (
             <div className="p-4 space-y-2">
-              {patterns.map(({ patternId, url }) => (
+              {patterns.map(({ patternId, url, useMultiply }) => (
                 <div
                   key={patternId}
-                  className="group flex items-center justify-between p-3 rounded hover:bg-gray-50 transition-colors"
+                  className="group flex items-center gap-3 p-3 rounded hover:bg-gray-50 transition-colors"
                 >
                   <img className="w-16 h-16 object-cover rounded bg-gray-100" src={url} alt="" />
+                  <div className="flex-1 flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={useMultiply || false}
+                        onChange={e => {
+                          const checked = e.target.checked
+                          sdk?.setPatternMultiply(patternId, checked)
+                          if (canvasData && onCanvasUpdate) {
+                            const index = canvasData.patternList.findIndex(p => p.patternId === patternId)
+                            if (index !== -1) {
+                              const newCanvasData = update(canvasData, {
+                                patternList: {
+                                  [index]: {
+                                    useMultiply: { $set: checked }
+                                  }
+                                }
+                              })
+                              onCanvasUpdate(newCanvasData)
+                            }
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span>混合模式</span>
+                    </label>
+                  </div>
                   <button
                     className="px-3 py-1 text-sm text-red-600 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded transition-opacity"
                     onClick={e => {

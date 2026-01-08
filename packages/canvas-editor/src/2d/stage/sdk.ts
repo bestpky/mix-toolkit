@@ -63,9 +63,10 @@ export class Sdk {
     const parentElement = this.canvas.parentElement
     if (!parentElement) return
 
-    const createCanvas = (zIndex: string) => {
+    const createCanvas = (zIndex: string, id: string) => {
       const canvas = document.createElement('canvas')
       parentElement.appendChild(canvas)
+      canvas.id = id
       canvas.width = this.canvas.width
       canvas.height = this.canvas.height
       canvas.style.position = 'absolute'
@@ -76,22 +77,23 @@ export class Sdk {
     }
 
     // 背景canvas (显示原始背景图, z-index: 0)
-    this.backgroundCanvas = createCanvas('0')
+    this.backgroundCanvas = createCanvas('0', 'canvas-background')
     this.backgroundCanvasCtx = this.backgroundCanvas.getContext('2d') as CanvasRenderingContext2D
 
     // 光标canvas (显示橡皮擦光标, z-index: 2)
-    this.cursorCanvas = createCanvas('2')
+    this.cursorCanvas = createCanvas('2', 'canvas-cursor')
     this.cursorCanvasCtx = this.cursorCanvas.getContext('2d') as CanvasRenderingContext2D
     this.setupCursorEvents()
 
     // 备份canvas (用于恢复功能, 不显示)
     this.backupCanvas = document.createElement('canvas')
+    this.backupCanvas.id = 'canvas-backup'
     this.backupCanvas.width = this.canvas.width
     this.backupCanvas.height = this.canvas.height
     this.backupCanvasCtx = this.backupCanvas.getContext('2d') as CanvasRenderingContext2D
 
     // 圈选canvas (z-index: 2)
-    this.circlingCanvas = createCanvas('2')
+    this.circlingCanvas = createCanvas('2', 'canvas-circling')
     this.circlingCanvas.style.display = 'none'
     this.circlingCanvasCtx = this.circlingCanvas.getContext('2d') as CanvasRenderingContext2D
     this.setupCirclingEvents()
@@ -237,16 +239,22 @@ export class Sdk {
   reDraw() {
     this.clear()
 
-    // 背景图只绘制到backgroundCanvas（下层），不绘制到主canvas
+    // 背景图绘制到backgroundCanvas（下层）
     if (this.backgroundCanvasCtx) {
       this.backgroundCanvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height)
       this.drawBgImage(this.backgroundCanvasCtx)
+
+      // 如果有图案使用混合模式，需要先在主canvas绘制背景
+      const hasMultiplyPattern = this.patternList.some(p => p.useMultiply)
+      if (hasMultiplyPattern) {
+        this.drawBgImage(this.ctx)
+      }
     } else {
       // 如果没有backgroundCanvas，背景图绘制到主canvas
       this.drawBgImage(this.ctx)
     }
 
-    // 主canvas只绘制图案和预设区域
+    // 主canvas绘制图案和预设区域
     this.drawPatterns()
     if (this.presetVertices.length) {
       this.drawPresetArea()
@@ -332,8 +340,12 @@ export class Sdk {
   drawPatterns() {
     const indices = getIndices(3)
     const uvtData = getUVs(3)
-    this.patternList.forEach(({ patternImage, vertices }) => {
-      this.ctx.globalCompositeOperation = 'multiply'
+    this.patternList.forEach(({ patternImage, vertices, useMultiply }) => {
+      // 保存当前状态
+      this.ctx.save()
+
+      // 根据 useMultiply 属性设置混合模式
+      this.ctx.globalCompositeOperation = useMultiply ? 'multiply' : 'source-over'
 
       // 创建离屏canvas用于调整颜色
       const offscreenCanvas = document.createElement('canvas')
@@ -357,6 +369,9 @@ export class Sdk {
 
       // 绘制到主画布
       this.ctx.drawImage(offscreenCanvas, 0, 0)
+
+      // 恢复状态
+      this.ctx.restore()
     })
   }
 
@@ -372,6 +387,21 @@ export class Sdk {
     const newPatternList = update(this.patternList, {
       [index]: {
         $merge: params
+      }
+    })
+    this.patternList = newPatternList
+    this.reDraw()
+  }
+
+  // 更新图案的混合模式
+  setPatternMultiply(patternId: string, useMultiply: boolean) {
+    const index = this.patternList.findIndex(v => v.patternId === patternId)
+    if (index === -1) return
+    const newPatternList = update(this.patternList, {
+      [index]: {
+        useMultiply: {
+          $set: useMultiply
+        }
       }
     })
     this.patternList = newPatternList
@@ -440,7 +470,12 @@ export class Sdk {
   mergeImageData() {
     if (!this.backgroundCanvas || !this.backgroundCanvasCtx) return
     const imageData1 = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height)
-    const imageData2 = this.backgroundCanvasCtx.getImageData(0, 0, this.backgroundCanvas.width, this.backgroundCanvas.height)
+    const imageData2 = this.backgroundCanvasCtx.getImageData(
+      0,
+      0,
+      this.backgroundCanvas.width,
+      this.backgroundCanvas.height
+    )
 
     if (!imageData1 || !imageData2) return
     const data1 = imageData1.data

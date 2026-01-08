@@ -27,6 +27,7 @@ export interface IPattern {
   patternId: string
   url: string // 图案URL
   vertices: number[] // 16个顶点坐标
+  useMultiply?: boolean // 是否使用混合模式 (multiply)
 }
 
 // 画布数据

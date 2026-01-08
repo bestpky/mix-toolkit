@@ -40,14 +40,15 @@ export const Stage: FC<IStageProps> = ({ canvasData, onCanvasUpdate, onSdkChange
 
       // 加载所有图案
       const promises = data.patternList.map<Promise<IPatternSdk>>(
-        async ({ url, patternId, vertices }) => {
+        async ({ url, patternId, vertices, useMultiply }) => {
           const patternImage = await loadImage(url, { crossOrigin: 'anonymous' })
           const centerPoint = getCenterPointByVertices(vertices)
           return {
             patternId,
             patternImage,
             vertices,
-            centerPoint
+            centerPoint,
+            useMultiply
           }
         }
       )
@@ -126,7 +127,8 @@ export const Stage: FC<IStageProps> = ({ canvasData, onCanvasUpdate, onSdkChange
       patternId,
       patternImage,
       vertices: sixteenPoints,
-      centerPoint
+      centerPoint,
+      useMultiply: false // 默认不使用混合模式
     }
     sdkRef.current.addPattern(newPattern)
     sdkRef.current.setPresetRelativePatternId(index, patternId)
@@ -140,7 +142,8 @@ export const Stage: FC<IStageProps> = ({ canvasData, onCanvasUpdate, onSdkChange
           {
             patternId,
             url: canUsePattern.url,
-            vertices: sixteenPoints
+            vertices: sixteenPoints,
+            useMultiply: false // 默认不使用混合模式
           }
         ]
       },
