@@ -1,5 +1,19 @@
-import { loadImage, selectFiles } from '@mix-toolkit/utils'
+import { selectFiles } from '@mix-toolkit/utils'
 import { IPoint } from './types'
+
+// 获取16个点的中心点
+export function getCenterPointByVertices(vertices: number[]): IPoint {
+  let x = 0
+  let y = 0
+  for (let i = 0; i < vertices.length; i += 2) {
+    x += vertices[i]
+    y += vertices[i + 1]
+  }
+  x /= vertices.length / 2
+  y /= vertices.length / 2
+
+  return { x, y }
+}
 
 /**
  * 顶点坐标索引数组，先上三角后下三角
@@ -28,24 +42,6 @@ export function getUVs(num: number) {
     }
   }
   return uvtData
-}
-
-export function getMaxSize2(vertices?: number[]) {
-  if (!vertices) return { width: 0, height: 0, origin: { x: 0, y: 0 } }
-  const ax = vertices[0]
-  const ay = vertices[1]
-  const bx = vertices[6]
-  const by = vertices[7]
-  const cx = vertices[24]
-  const cy = vertices[25]
-  const width = Math.sqrt(Math.pow(ax - cx, 2) + Math.pow(ay - cy, 2))
-  const height = Math.sqrt(Math.pow(ax - bx, 2) + Math.pow(ay - by, 2))
-
-  return {
-    width,
-    height,
-    ratio: (width / height).toFixed(2)
-  }
 }
 
 export function getPointList(vertices: number[]) {

@@ -15,6 +15,7 @@ export function popDropdown(params: IParams) {
   div.style.position = 'absolute'
   div.style.top = `${y}px`
   div.style.left = `${x}px`
+  div.style.zIndex = '10'
   container.appendChild(div)
 
   createRoot(div).render(<Dropdown handleClickEraser={handleClickEraser} handleClickRestore={handleClickRestore} />)
