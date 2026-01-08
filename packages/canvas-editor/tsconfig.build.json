@@ -9,7 +9,8 @@
     "declarationMap": false,
     "paths": {
       "@mix-toolkit/utils": ["../utils/src"]
-    }
+    },
+    "jsx": "react-jsx"
   },
   "include": ["src/**/*", "type.d.ts"],
   "exclude": ["dist", "node_modules"],

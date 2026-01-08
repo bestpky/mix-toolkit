@@ -3,6 +3,8 @@ import { execa } from 'execa'
 import path from 'path'
 
 const pkgs = fs.readdirSync('packages').filter(p => {
+  // Exclude editor-server (standalone Node.js server, not a library)
+  if (p === 'editor-server') return false
   return fs.statSync(`packages/${p}`).isDirectory()
 })
 
