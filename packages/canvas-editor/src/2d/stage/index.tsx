@@ -17,67 +17,76 @@ export const Stage: FC<IStageProps> = ({ canvasData, onCanvasUpdate, onSdkChange
   const canvasNode = useRef<HTMLCanvasElement>(null)
   const [loading, setLoading] = useState(false)
   const sdkRef = useRef<Sdk | null>(null)
+  const initializedRef = useRef(false)
 
   const canvasWidth = canvasData?.width || 0
   const canvasHeight = canvasData?.height || 0
 
-  const init = useCallback(async (data: ICanvasData) => {
-    if (!canvasNode.current) {
-      console.warn('Canvas ref not ready')
-      return
-    }
+  // 初始化 SDK（仅执行一次）
+  const init = useCallback(
+    async (data: ICanvasData) => {
+      if (!canvasNode.current) {
+        console.warn('Canvas ref not ready')
+        return
+      }
 
-    if (!data.width || !data.height) {
-      console.warn('Canvas dimensions not set')
-      return
-    }
+      if (!data.width || !data.height) {
+        console.warn('Canvas dimensions not set')
+        return
+      }
 
-    setLoading(true)
+      setLoading(true)
 
-    try {
-      // 加载背景图
-      const originImage = await loadImage(data.originUrl, { crossOrigin: 'anonymous' })
+      try {
+        // 加载背景图
+        const originImage = await loadImage(data.originUrl, { crossOrigin: 'anonymous' })
 
-      // 加载所有图案
-      const promises = data.patternList.map<Promise<IPatternSdk>>(
-        async ({ url, patternId, vertices, useMultiply }) => {
-          const patternImage = await loadImage(url, { crossOrigin: 'anonymous' })
-          const centerPoint = getCenterPointByVertices(vertices)
-          return {
-            patternId,
-            patternImage,
-            vertices,
-            centerPoint,
-            useMultiply
+        // 加载所有图案
+        const promises = data.patternList.map<Promise<IPatternSdk>>(
+          async ({ url, patternId, vertices, useMultiply }) => {
+            const patternImage = await loadImage(url, { crossOrigin: 'anonymous' })
+            const centerPoint = getCenterPointByVertices(vertices)
+            return {
+              patternId,
+              patternImage,
+              vertices,
+              centerPoint,
+              useMultiply
+            }
           }
-        }
-      )
-      const patternList = await Promise.all(promises)
+        )
+        const patternList = await Promise.all(promises)
 
-      // 创建SDK实例
-      const sdk = new Sdk({
-        canvas: canvasNode.current,
-        originImage,
-        patternList,
-        presetVertices: data.vertices
-      })
-      sdk.reDraw()
+        // 创建SDK实例
+        const sdk = new Sdk({
+          canvas: canvasNode.current,
+          originImage,
+          patternList,
+          presetVertices: data.vertices
+        })
+        sdk.reDraw()
 
-      // 保存SDK实例到ref
-      sdkRef.current = sdk
-      // 通过回调传递SDK实例
-      onSdkChange?.(sdk)
-    } catch (error) {
-      console.error('Failed to initialize canvas editor:', error)
-      sdkRef.current = null
-      onSdkChange?.(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [onSdkChange])
+        // 保存SDK实例到ref
+        sdkRef.current = sdk
+        // 通过回调传递SDK实例
+        onSdkChange?.(sdk)
+        initializedRef.current = true
+      } catch (error) {
+        console.error('Failed to initialize canvas editor:', error)
+        sdkRef.current = null
+        onSdkChange?.(null)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [onSdkChange]
+  )
 
+  // 只在首次挂载时初始化
   useEffect(() => {
-    init(canvasData)
+    if (!initializedRef.current) {
+      init(canvasData)
+    }
   }, [init, canvasData])
 
   // 拖拽时高亮预设区域
@@ -159,7 +168,7 @@ export const Stage: FC<IStageProps> = ({ canvasData, onCanvasUpdate, onSdkChange
   }
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-gray-50 overflow-auto">
+    <div className="flex-1 flex items-center justify-center bg-gray-50 overflow-auto relative">
       <div
         id="eraser-canvas-wrapper"
         style={{
@@ -172,12 +181,23 @@ export const Stage: FC<IStageProps> = ({ canvasData, onCanvasUpdate, onSdkChange
         onDrop={handleDropPattern}
       >
         <canvas
+          id="canvas-patterns"
           ref={canvasNode}
           width={canvasWidth}
           height={canvasHeight}
           style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
         />
       </div>
+
+      {/* 加载遮罩层 */}
+      {loading && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg px-8 py-6 shadow-xl flex flex-col items-center gap-3">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <div className="text-gray-700 font-medium">加载中...</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
