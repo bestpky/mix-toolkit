@@ -2,6 +2,24 @@
 
 基于 Canvas 2D 的图案变形编辑器，支持图案拖拽、变形渲染、橡皮擦编辑和图片导出功能。
 
+## 安装
+
+```bash
+npm install @mix-toolkit/canvas-editor
+```
+
+**重要：** 使用此包时，需要在项目中引入 CSS 文件：
+
+```javascript
+// 方式1: 在入口文件中直接引入
+import '@mix-toolkit/canvas-editor/dist/index.css'
+
+// 方式2: 在 HTML 中引入
+<link rel="stylesheet" href="node_modules/@mix-toolkit/canvas-editor/dist/index.css">
+```
+
+如果你使用的构建工具（如 Vite、Webpack）支持自动处理 CSS，也可以依赖工具自动处理。
+
 ## 目录
 
 - [基本功能](#基本功能)

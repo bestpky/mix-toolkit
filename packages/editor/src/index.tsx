@@ -1,3 +1,4 @@
+import './index.css'
 import { useState, useEffect } from 'react'
 import StarterKit from '@tiptap/starter-kit'
 import Typography from '@tiptap/extension-typography'

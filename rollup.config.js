@@ -64,7 +64,7 @@ const config = {
     postcss({
       extract: path.resolve(packageDir, 'dist/index.css'),
       minimize: true, // 压缩 CSS
-      use: [
+      use: TARGET === 'canvas-editor' ? [] : [
         [
           'sass',
           {
@@ -75,10 +75,14 @@ const config = {
           }
         ]
       ],
-      modules: {
+      modules: TARGET === 'canvas-editor' ? false : {
         // CSS 模块支持
         generateScopedName: '[name]__[local]___[hash:base64:5]'
-      }
+      },
+      // canvas-editor 和 editor 使用 Tailwind，需要 PostCSS 处理
+      config: ['canvas-editor', 'editor'].includes(TARGET) ? {
+        path: path.resolve(packageDir, 'postcss.config.js')
+      } : false
     }),
     typescript({
       tsconfig: path.resolve(packageDir, 'tsconfig.build.json'),
