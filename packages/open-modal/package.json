@@ -14,5 +14,9 @@
   "license": "ISC",
   "dependencies": {
     "@mix-toolkit/better-lazy-image": "workspace:^0.0.1"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   }
 }
