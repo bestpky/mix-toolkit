@@ -3,8 +3,9 @@
  * 支持2D贴图和图案橡皮擦功能
  */
 
-export { Stage } from './stage'
-export { Control } from './control'
+export { CanvasEditor } from './canvas-editor'
+export type { CanvasEditorProps } from './canvas-editor'
+
 export { CanUseGridPatterns } from './can-use-grid-patterns'
 
 export type {
