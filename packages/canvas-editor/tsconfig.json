@@ -7,8 +7,8 @@
     "emitDeclarationOnly": true, // 只生成声明文件
     "jsx": "react-jsx",
     "paths": {
-      "@mix-toolkit/utils": ["../utils/src"],
-      "@mix-toolkit/hooks": ["../hooks/src"]
+      "@pky/utils": ["../utils/src"],
+      "@pky/hooks": ["../hooks/src"]
     }
   },
   "include": ["src/**/*", "*.d.ts"],

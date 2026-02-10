@@ -1,5 +1,5 @@
 {
-  "name": "@mix-toolkit/utils",
+  "name": "@pky/utils",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.cjs.js",

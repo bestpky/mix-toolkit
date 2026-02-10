@@ -14,6 +14,20 @@ function checkNpmLogin() {
   }
 }
 
+// 检查包版本是否已发布
+function isVersionPublished(packageName, version) {
+  try {
+    const result = execSync(`npm view ${packageName}@${version} version`, {
+      encoding: "utf8",
+      stdio: ['pipe', 'pipe', 'pipe']
+    }).trim();
+    return result === version;
+  } catch {
+    // 如果命令失败，说明版本不存在
+    return false;
+  }
+}
+
 // 发布单个包
 async function publishPackage(pkg) {
   console.log(`\n📦 Publishing ${pkg.name}...`);
@@ -22,12 +36,18 @@ async function publishPackage(pkg) {
     // 显示包信息
     console.log(`  📋 Package: ${pkg.npmName}@${pkg.version}`);
 
+    // 检查版本是否已发布
+    if (isVersionPublished(pkg.npmName, pkg.version)) {
+      console.log(`  ⏭️  ${pkg.npmName}@${pkg.version} already published, skipping...`);
+      return { success: true, pkg, skipped: true };
+    }
+
     // 发布包
     console.log(`  🚀 Publishing to npm...`);
-    execSync("npm publish", { cwd: pkg.path, stdio: "inherit" });
+    execSync("npm publish --access public", { cwd: pkg.path, stdio: "inherit" });
 
     console.log(`  ✅ ${pkg.npmName} published successfully!`);
-    return { success: true, pkg };
+    return { success: true, pkg, skipped: false };
   } catch (error) {
     console.error(`  ❌ Failed to publish ${pkg.name}:`, error.message);
     return { success: false, pkg, error: error.message };
@@ -108,18 +128,32 @@ async function publishAllPackages() {
 
   // 显示结果
   const successCount = results.filter((r) => r.success).length;
+  const skippedCount = results.filter((r) => r.skipped).length;
+  const publishedCount = successCount - skippedCount;
+
   console.log(
-    `\n🎉 All done! ${successCount}/${packages.length} packages published successfully.`
+    `\n🎉 All done! ${publishedCount} published, ${skippedCount} skipped, ${successCount}/${packages.length} total.`
   );
 
-  console.log("\n📋 Published packages:");
-  results.forEach((r) => {
-    if (r.success) {
-      console.log(`  ✅ ${r.pkg.npmName}`);
-    }
-  });
+  if (publishedCount > 0) {
+    console.log("\n📋 Newly published packages:");
+    results.forEach((r) => {
+      if (r.success && !r.skipped) {
+        console.log(`  ✅ ${r.pkg.npmName}@${r.pkg.version}`);
+      }
+    });
+  }
 
-  console.log("\n💡 Users can now install:");
+  if (skippedCount > 0) {
+    console.log("\n⏭️  Skipped packages (already published):");
+    results.forEach((r) => {
+      if (r.skipped) {
+        console.log(`  ⏭️  ${r.pkg.npmName}@${r.pkg.version}`);
+      }
+    });
+  }
+
+  console.log("\n💡 Users can install:");
   results.forEach((r) => {
     if (r.success) {
       console.log(`  npm install ${r.pkg.npmName}`);

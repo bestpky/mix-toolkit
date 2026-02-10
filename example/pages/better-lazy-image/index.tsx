@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getImages } from './get-images'
 import styles from './index.module.scss'
-import { LazyImage } from '@mix-toolkit/better-lazy-image/src/index'
-import { initLazyImage } from '@mix-toolkit/better-lazy-image/src/observer'
+import { LazyImage } from '@pky/better-lazy-image/src/index'
+import { initLazyImage } from '@pky/better-lazy-image/src/observer'
 
 interface ImageItem {
   author: string

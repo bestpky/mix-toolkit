@@ -18,7 +18,7 @@ const packageJson = JSON.parse(fs.readFileSync(path.resolve(packageDir, 'package
 // 判断是否为外部依赖
 const isExternal = id => {
   // 1. monorepo 内部包视为外部依赖（关键修改）
-  if (id.startsWith('@mix-toolkit/')) {
+  if (id.startsWith('@pky/')) {
     return true
   }
 

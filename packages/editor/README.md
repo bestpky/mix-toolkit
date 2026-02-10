@@ -58,7 +58,7 @@
 ### 基础用法
 
 ```tsx
-import { CollaborationEditor } from '@mix-toolkit/editor'
+import { CollaborationEditor } from '@pky/editor'
 
 function App() {
   return <CollaborationEditor />

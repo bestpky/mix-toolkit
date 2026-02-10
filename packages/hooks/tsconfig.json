@@ -6,7 +6,7 @@
     "baseUrl": ".",
     "emitDeclarationOnly": true,
     "paths": {
-      "@mix-toolkit/utils": ["../utils/src"]
+      "@pky/utils": ["../utils/src"]
     }
   },
   "include": ["src/**/*", "type.d.ts"],

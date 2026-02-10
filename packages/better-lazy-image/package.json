@@ -1,5 +1,5 @@
 {
-  "name": "@mix-toolkit/better-lazy-image",
+  "name": "@pky/better-lazy-image",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.cjs.js",

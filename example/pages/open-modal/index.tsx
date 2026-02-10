@@ -1,4 +1,4 @@
-import { openModal, Modal } from '@mix-toolkit/open-modal/src'
+import { openModal, Modal } from '@pky/open-modal/src'
 import { useState } from 'react'
 
 export const OpenModalPage = () => {

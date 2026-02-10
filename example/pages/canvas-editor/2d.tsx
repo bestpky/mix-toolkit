@@ -1,5 +1,5 @@
 import { FC, useState } from 'react'
-import { CanvasEditor, ICanvasData, ICanUsePattern } from '@mix-toolkit/canvas-editor/src/2d'
+import { CanvasEditor, ICanvasData, ICanUsePattern } from '@pky/canvas-editor/src/2d'
 
 // 使用 picsum.photos（真实图片，支持跨域）
 // 使用固定的图片ID，确保每次加载同一个URL都是相同的图片

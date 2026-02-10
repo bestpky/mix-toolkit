@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@mix-toolkit': resolve(__dirname, './packages')
+      '@pky': resolve(__dirname, './packages')
     }
   }
 })

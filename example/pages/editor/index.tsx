@@ -1,4 +1,4 @@
-import { MixEditor } from '@mix-toolkit/editor/src/index'
+import { MixEditor } from '@pky/editor/src/index'
 
 // 生成随机用户信息
 const generateUser = () => {

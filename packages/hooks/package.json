@@ -1,5 +1,5 @@
 {
-  "name": "@mix-toolkit/hooks",
+  "name": "@pky/hooks",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.cjs.js",
@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@mix-toolkit/utils": "workspace:^0.0.1"
+    "@pky/utils": "workspace:^0.0.1"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

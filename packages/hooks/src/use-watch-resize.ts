@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { resizeWatcher } from '@mix-toolkit/utils'
+import { resizeWatcher } from '@pky/utils'
 
 interface Size {
   width: number

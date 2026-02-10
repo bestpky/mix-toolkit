@@ -2,7 +2,7 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 import update from 'immutability-helper'
 
-import { loadImage } from '@mix-toolkit/utils'
+import { loadImage } from '@pky/utils'
 import { ICanUsePattern, ICanvasData } from '../types'
 import { Sdk } from './sdk'
 import { IPatternSdk } from './sdk.type'

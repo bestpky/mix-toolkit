@@ -1,4 +1,4 @@
-import { selectFiles } from '@mix-toolkit/utils'
+import { selectFiles } from '@pky/utils'
 import { IPoint } from './types'
 
 // 获取16个点的中心点

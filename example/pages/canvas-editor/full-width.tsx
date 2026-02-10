@@ -1,6 +1,6 @@
 import { FC, useState } from 'react'
-import { FullWidthCanvasEditor, IFashionCanvasPeiYi } from '@mix-toolkit/canvas-editor/src/full-width'
-import { ICanUsePattern } from '@mix-toolkit/canvas-editor/src/2d'
+import { FullWidthCanvasEditor, IFashionCanvasPeiYi } from '@pky/canvas-editor/src/full-width'
+import { ICanUsePattern } from '@pky/canvas-editor/src/2d'
 
 export const FullWidthEditor: FC = () => {
   // 示例胚衣数据

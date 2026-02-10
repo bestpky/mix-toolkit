@@ -1,4 +1,4 @@
-import { loadImage } from '@mix-toolkit/utils'
+import { loadImage } from '@pky/utils'
 
 export const getCanvasRatio = (viewportHeight: number, imageHeight?: number) => {
   if (!imageHeight) {
