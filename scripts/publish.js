@@ -44,7 +44,7 @@ async function publishPackage(pkg) {
 
     // 发布包
     console.log(`  🚀 Publishing to npm...`);
-    execSync("npm publish --access public", { cwd: pkg.path, stdio: "inherit" });
+    execSync("pnpm publish --access public --no-git-checks", { cwd: pkg.path, stdio: "inherit" });
 
     console.log(`  ✅ ${pkg.npmName} published successfully!`);
     return { success: true, pkg, skipped: false };
