@@ -4,4 +4,3 @@ dist
 tsconfig.tsbuildinfo
 .rollup.cache
 .vscode
-.npmrc

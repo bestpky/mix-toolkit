@@ -1,59 +1,30 @@
-# 工具杂烩
+# mix-toolkit
 
-## 构建
+## 发布流程
 
-```bash
-# 构建所有包
-npm run build
-```
+本项目通过 GitHub Actions 自动化发包，推送 tag 即可触发。
 
-## 版本管理
+### 日常发版
 
 ```bash
-# 升级所有包的版本
-npm run version:patch   # 所有包 patch 版本 +1
-npm run version:minor   # 所有包 minor 版本 +1
-npm run version:major   # 所有包 major 版本 +1
-
-# 升级单个包的版本
-node scripts/version.js patch better-lazy-image
-node scripts/version.js minor open-modal
+pnpm release patch   # 补丁版本 0.0.1 → 0.0.2
+pnpm release minor   # 次版本   0.0.1 → 0.1.0
+pnpm release major   # 主版本   0.0.1 → 1.0.0
 ```
 
-## 发布
+该命令会自动完成：
 
-```bash
-# 发布所有包
-npm run publish
+1. 更新所有包的 `package.json` 版本号
+2. `git commit`
+3. 打对应版本的 `git tag`
+4. `git push` 推送代码和 tag
 
-# 发布单个包
-node scripts/publish.js better-lazy-image
-node scripts/publish.js open-modal
+tag 推送后，GitHub Actions 会自动执行构建并发布到 npm。
 
-```
+### 首次配置
 
-## 关于 tsconfig
+在 GitHub 仓库的 `Settings → Secrets and variables → Actions` 中添加：
 
-1. tsconfig.base.json：
-
-   存放所有包共享的编译选项
-   修改一次，影响所有包
-   保证编译行为的一致性
-
-2. 根目录 tsconfig.json：
-
-   继承基础配置
-   添加项目引用和全局路径映射
-   作为 tsc -b 的入口点
-
-3. 子包 tsconfig.json：
-
-   继承基础配置
-   添加包特定的路径和依赖配置
-   用于生成类型声明文件
-
-4. 子包 tsconfig.build.json：
-
-   继承基础配置，但关闭 composite 和 declaration
-   专门用于 Rollup 构建 JavaScript 代码
-   解决 TypeScript 插件的警告问题
+| Secret 名称 | 说明 |
+|------------|------|
+| `NPM_TOKEN` | npm Access Token，需要有发包权限 |

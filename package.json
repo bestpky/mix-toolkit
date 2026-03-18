@@ -6,12 +6,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "test": "vitest",
     "build": "node scripts/build.js",
     "publish": "node scripts/publish.js",
-    "test": "vitest",
-    "version:patch": "node scripts/version.js patch",
-    "version:minor": "node scripts/version.js minor",
-    "version:major": "node scripts/version.js major"
+    "release": "node scripts/release.js"
   },
   "keywords": [],
   "author": "",
