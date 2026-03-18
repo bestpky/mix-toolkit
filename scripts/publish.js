@@ -2,18 +2,6 @@
 import { execSync } from "child_process";
 import { getPackages, validatePackage, displayPackages } from "./utils.js";
 
-// 检查npm登录状态
-function checkNpmLogin() {
-  try {
-    const whoami = execSync("npm whoami", { encoding: "utf8" }).trim();
-    console.log(`✅ Logged in as: ${whoami}`);
-    return true;
-  } catch {
-    console.error('❌ Please run "npm login" first');
-    return false;
-  }
-}
-
 // 检查包版本是否已发布
 function isVersionPublished(packageName, version) {
   try {
@@ -68,11 +56,6 @@ async function publishSpecificPackage(packageName) {
 
   console.log(`🚀 Publishing specific package: ${packageName}\n`);
 
-  // 检查登录和验证包
-  if (!checkNpmLogin()) {
-    return false;
-  }
-
   const validation = validatePackage(pkg);
   if (!validation.valid) {
     console.error(`❌ Package validation failed: ${validation.reason}`);
@@ -95,11 +78,6 @@ async function publishAllPackages() {
   console.log("🚀 Publishing all packages...\n");
   displayPackages(packages);
   console.log("");
-
-  // 检查npm登录
-  if (!checkNpmLogin()) {
-    return false;
-  }
 
   // 验证所有包
   console.log("🔍 Validating packages...");
